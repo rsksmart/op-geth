@@ -93,6 +93,9 @@ type Header struct {
 
 	// ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
 	ParentBeaconRoot *common.Hash `json:"parentBeaconBlockRoot" rlp:"optional"`
+
+	// Hash from the json object.
+	NodeHash common.Hash `json:"hash" rlp:"-"`
 }
 
 // field type overrides for gencodec
@@ -483,12 +486,15 @@ func (b *Block) WithWithdrawals(withdrawals []*Withdrawal) *Block {
 }
 
 // Hash returns the keccak256 hash of b's header.
-// The hash is computed on the first call and cached thereafter.
+// The hash is computed on the first call if there was no hash on the json object and cached thereafter.
 func (b *Block) Hash() common.Hash {
 	if hash := b.hash.Load(); hash != nil {
 		return hash.(common.Hash)
 	}
-	v := b.header.Hash()
+	v := b.header.NodeHash
+	if v == (common.Hash{}) {
+		v = b.header.Hash()
+	}
 	b.hash.Store(v)
 	return v
 }
