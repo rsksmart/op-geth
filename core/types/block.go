@@ -381,7 +381,7 @@ func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Ext
 
 func (b *Block) BaseFee() *big.Int {
 	if b.header.BaseFee == nil {
-		return nil
+		return big.NewInt(1)
 	}
 	return new(big.Int).Set(b.header.BaseFee)
 }
