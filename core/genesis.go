@@ -105,7 +105,7 @@ func ReadGenesis(db ethdb.Database) (*Genesis, error) {
 	genesis.Difficulty = genesisHeader.Difficulty
 	genesis.Mixhash = genesisHeader.MixDigest
 	genesis.Coinbase = genesisHeader.Coinbase
-	genesis.BaseFee = genesisHeader.BaseFee
+	genesis.BaseFee = genesisHeader.BaseFee()
 	genesis.ExcessBlobGas = genesisHeader.ExcessBlobGas
 	genesis.BlobGasUsed = genesisHeader.BlobGasUsed
 	if genesis.Alloc == nil {
@@ -477,7 +477,7 @@ func (g *Genesis) ToBlock() *types.Block {
 		Extra:      g.ExtraData,
 		GasLimit:   g.GasLimit,
 		GasUsed:    g.GasUsed,
-		BaseFee:    g.BaseFee,
+		EthBaseFee: g.BaseFee,
 		Difficulty: g.Difficulty,
 		MixDigest:  g.Mixhash,
 		Coinbase:   g.Coinbase,
@@ -491,9 +491,9 @@ func (g *Genesis) ToBlock() *types.Block {
 	}
 	if g.Config != nil && g.Config.IsLondon(common.Big0) {
 		if g.BaseFee != nil {
-			head.BaseFee = g.BaseFee
+			head.EthBaseFee = g.BaseFee
 		} else {
-			head.BaseFee = new(big.Int).SetUint64(params.InitialBaseFee)
+			head.EthBaseFee = new(big.Int).SetUint64(params.InitialBaseFee)
 		}
 	}
 	var withdrawals []*types.Withdrawal

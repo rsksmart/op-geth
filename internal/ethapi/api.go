@@ -68,8 +68,8 @@ func (s *EthereumAPI) GasPrice(ctx context.Context) (*hexutil.Big, error) {
 	if err != nil {
 		return nil, err
 	}
-	if head := s.b.CurrentHeader(); head.BaseFee != nil {
-		tipcap.Add(tipcap, head.BaseFee)
+	if head := s.b.CurrentHeader(); head.BaseFee() != nil {
+		tipcap.Add(tipcap, head.BaseFee())
 	}
 	return (*hexutil.Big)(tipcap), err
 }
@@ -1161,7 +1161,7 @@ func doCall(ctx context.Context, b Backend, args TransactionArgs, state *state.S
 	defer cancel()
 
 	// Get a new instance of the EVM.
-	msg, err := args.ToMessage(globalGasCap, header.BaseFee)
+	msg, err := args.ToMessage(globalGasCap, header.BaseFee())
 	if err != nil {
 		return nil, err
 	}
@@ -1467,8 +1467,8 @@ func RPCMarshalHeader(head *types.Header) map[string]interface{} {
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
 	}
-	if head.BaseFee != nil {
-		result["baseFeePerGas"] = (*hexutil.Big)(head.BaseFee)
+	if head.BaseFee() != nil {
+		result["baseFeePerGas"] = (*hexutil.Big)(head.BaseFee())
 	}
 	if head.WithdrawalsHash != nil {
 		result["withdrawalsRoot"] = head.WithdrawalsHash
@@ -1817,7 +1817,7 @@ func AccessList(ctx context.Context, b Backend, blockNrOrHash rpc.BlockNumberOrH
 		statedb := db.Copy()
 		// Set the accesslist to the last al
 		args.AccessList = &accessList
-		msg, err := args.ToMessage(b.RPCGasCap(), header.BaseFee)
+		msg, err := args.ToMessage(b.RPCGasCap(), header.BaseFee())
 		if err != nil {
 			return nil, 0, nil, err
 		}
@@ -1953,7 +1953,7 @@ func (s *TransactionAPI) GetTransactionByHash(ctx context.Context, hash common.H
 			return nil, err
 		}
 		rcpt := depositTxReceipt(ctx, blockHash, index, s.b, tx)
-		return newRPCTransaction(tx, blockHash, blockNumber, header.Time, index, header.BaseFee, s.b.ChainConfig(), rcpt), nil
+		return newRPCTransaction(tx, blockHash, blockNumber, header.Time, index, header.BaseFee(), s.b.ChainConfig(), rcpt), nil
 	}
 	// No finalized transaction, try to retrieve it from the pool
 	if tx := s.b.GetPoolTransaction(hash); tx != nil {
