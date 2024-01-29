@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="op-geth-local" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="op-geth" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="--datadir ./datadir --http --http.corsdomain=&quot;*&quot; --http.vhosts=&quot;*&quot; --http.addr=0.0.0.0 --http.api=web3,debug,eth,txpool,net,engine --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.origins=&quot;*&quot; --ws.api=debug,eth,txpool,net,engine --syncmode=full --gcmode=archive --nodiscover --maxpeers=0 --networkid=42069 --authrpc.vhosts=&quot;*&quot; --authrpc.addr=0.0.0.0 --authrpc.port=8551 --authrpc.jwtsecret=./jwt.txt --rollup.disabletxpoolgossip=true" />
+    <EXTENSION ID="com.fapiko.jetbrains.plugins.better_direnv.runconfigs.GolandRunConfigurationExtension">
+      <option name="DIRENV_ENABLED" value="false" />
+      <option name="DIRENV_TRUSTED" value="false" />
+    </EXTENSION>
+    <kind value="DIRECTORY" />
+    <package value="github.com/ethereum/go-ethereum" />
+    <directory value="$PROJECT_DIR$/cmd/geth" />
+    <filePath value="$PROJECT_DIR$/../op-geth|$PROJECT_DIR$/cmd/geth/main.go" />
+    <output_directory value="$PROJECT_DIR$/build/bin" />
+    <method v="2" />
+  </configuration>
+</component>
