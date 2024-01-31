@@ -594,8 +594,8 @@ func (b *SimulatedBackend) SuggestGasPrice(ctx context.Context) (*big.Int, error
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
-	if b.pendingBlock.Header().BaseFee != nil {
-		return b.pendingBlock.Header().BaseFee, nil
+	if b.pendingBlock.Header().BaseFee() != nil {
+		return b.pendingBlock.Header().BaseFee(), nil
 	}
 	return big.NewInt(1), nil
 }
@@ -739,7 +739,7 @@ func (b *SimulatedBackend) callContract(ctx context.Context, call ethereum.CallM
 			// Backfill the legacy gasPrice for EVM execution, unless we're all zeroes
 			call.GasPrice = new(big.Int)
 			if call.GasFeeCap.BitLen() > 0 || call.GasTipCap.BitLen() > 0 {
-				call.GasPrice = math.BigMin(new(big.Int).Add(call.GasTipCap, header.BaseFee), call.GasFeeCap)
+				call.GasPrice = math.BigMin(new(big.Int).Add(call.GasTipCap, header.BaseFee()), call.GasFeeCap)
 			}
 		}
 	}

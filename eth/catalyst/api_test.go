@@ -781,7 +781,7 @@ func setBlockhash(data *engine.ExecutableData) *engine.ExecutableData {
 		GasLimit:    data.GasLimit,
 		GasUsed:     data.GasUsed,
 		Time:        data.Timestamp,
-		BaseFee:     data.BaseFeePerGas,
+		EthBaseFee:  data.BaseFeePerGas,
 		Extra:       data.ExtraData,
 		MixDigest:   data.Random,
 	}
@@ -938,7 +938,7 @@ func TestNewPayloadOnInvalidTerminalBlock(t *testing.T) {
 		GasLimit:    data.GasLimit,
 		GasUsed:     data.GasUsed,
 		Time:        data.Timestamp,
-		BaseFee:     data.BaseFeePerGas,
+		EthBaseFee:  data.BaseFeePerGas,
 		Extra:       data.ExtraData,
 		MixDigest:   data.Random,
 	}

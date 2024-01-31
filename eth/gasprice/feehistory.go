@@ -79,7 +79,7 @@ type txGasAndReward struct {
 // fills in the rest of the fields.
 func (oracle *Oracle) processBlock(bf *blockFees, percentiles []float64) {
 	chainconfig := oracle.backend.ChainConfig()
-	if bf.results.baseFee = bf.header.BaseFee; bf.results.baseFee == nil {
+	if bf.results.baseFee = bf.header.BaseFee(); bf.results.baseFee == nil {
 		bf.results.baseFee = new(big.Int)
 	}
 	if chainconfig.IsLondon(big.NewInt(int64(bf.blockNumber + 1))) {
