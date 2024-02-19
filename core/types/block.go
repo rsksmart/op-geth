@@ -80,7 +80,10 @@ type Header struct {
 	Nonce       BlockNonce     `json:"nonce"`
 
 	// BaseFee was added by EIP-1559 and is ignored in legacy headers.
-	BaseFee *big.Int `json:"baseFeePerGas" rlp:"optional"`
+	EthBaseFee *big.Int `json:"baseFeePerGas" rlp:"optional"`
+
+	// Rootstock specific
+	RskMinimumGasPrice *big.Int `json:"minimumGasPrice,omitempty" rlp:"optional"`
 
 	// WithdrawalsHash was added by EIP-4895 and is ignored in legacy headers.
 	WithdrawalsHash *common.Hash `json:"withdrawalsRoot" rlp:"optional"`
@@ -93,20 +96,36 @@ type Header struct {
 
 	// ParentBeaconRoot was added by EIP-4788 and is ignored in legacy headers.
 	ParentBeaconRoot *common.Hash `json:"parentBeaconBlockRoot" rlp:"optional"`
+
+	// Hash from the json object.
+	NodeHash common.Hash `json:"hash" rlp:"-"`
 }
 
 // field type overrides for gencodec
 type headerMarshaling struct {
-	Difficulty    *hexutil.Big
-	Number        *hexutil.Big
-	GasLimit      hexutil.Uint64
-	GasUsed       hexutil.Uint64
-	Time          hexutil.Uint64
-	Extra         hexutil.Bytes
-	BaseFee       *hexutil.Big
-	Hash          common.Hash `json:"hash"` // adds call to Hash() in MarshalJSON
-	BlobGasUsed   *hexutil.Uint64
-	ExcessBlobGas *hexutil.Uint64
+	Difficulty         *hexutil.Big
+	Number             *hexutil.Big
+	GasLimit           hexutil.Uint64
+	GasUsed            hexutil.Uint64
+	Time               hexutil.Uint64
+	Extra              hexutil.Bytes
+	EthBaseFee         *hexutil.Big
+	RskMinimumGasPrice *hexutil.Big
+	Hash               common.Hash `json:"hash"` // adds call to Hash() in MarshalJSON
+	BlobGasUsed        *hexutil.Uint64
+	ExcessBlobGas      *hexutil.Uint64
+}
+
+func (h *Header) isL1Block() bool {
+	return h.RskMinimumGasPrice != nil
+}
+
+func (h *Header) BaseFee() *big.Int {
+	if h.isL1Block() {
+		return h.RskMinimumGasPrice
+	} else {
+		return h.EthBaseFee
+	}
 }
 
 // Hash returns the block hash of the header, which is simply the keccak256 hash of its
@@ -121,8 +140,8 @@ var headerSize = common.StorageSize(reflect.TypeOf(Header{}).Size())
 // to approximate and limit the memory consumption of various caches.
 func (h *Header) Size() common.StorageSize {
 	var baseFeeBits int
-	if h.BaseFee != nil {
-		baseFeeBits = h.BaseFee.BitLen()
+	if h.BaseFee() != nil {
+		baseFeeBits = h.BaseFee().BitLen()
 	}
 	return headerSize + common.StorageSize(len(h.Extra)+(h.Difficulty.BitLen()+h.Number.BitLen()+baseFeeBits)/8)
 }
@@ -143,8 +162,8 @@ func (h *Header) SanityCheck() error {
 	if eLen := len(h.Extra); eLen > 100*1024 {
 		return fmt.Errorf("too large block extradata: size %d", eLen)
 	}
-	if h.BaseFee != nil {
-		if bfLen := h.BaseFee.BitLen(); bfLen > 256 {
+	if h.BaseFee() != nil {
+		if bfLen := h.BaseFee().BitLen(); bfLen > 256 {
 			return fmt.Errorf("too large base fee: bitlen %d", bfLen)
 		}
 	}
@@ -281,8 +300,8 @@ func CopyHeader(h *Header) *Header {
 	if cpy.Number = new(big.Int); h.Number != nil {
 		cpy.Number.Set(h.Number)
 	}
-	if h.BaseFee != nil {
-		cpy.BaseFee = new(big.Int).Set(h.BaseFee)
+	if h.BaseFee() != nil {
+		cpy.EthBaseFee = new(big.Int).Set(h.BaseFee())
 	}
 	if len(h.Extra) > 0 {
 		cpy.Extra = make([]byte, len(h.Extra))
@@ -377,10 +396,10 @@ func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
 
 func (b *Block) BaseFee() *big.Int {
-	if b.header.BaseFee == nil {
+	if b.header.BaseFee() == nil {
 		return nil
 	}
-	return new(big.Int).Set(b.header.BaseFee)
+	return new(big.Int).Set(b.header.BaseFee())
 }
 
 func (b *Block) BeaconRoot() *common.Hash { return b.header.ParentBeaconRoot }
@@ -483,12 +502,15 @@ func (b *Block) WithWithdrawals(withdrawals []*Withdrawal) *Block {
 }
 
 // Hash returns the keccak256 hash of b's header.
-// The hash is computed on the first call and cached thereafter.
+// The hash is computed on the first call if there was no hash on the json object and cached thereafter.
 func (b *Block) Hash() common.Hash {
 	if hash := b.hash.Load(); hash != nil {
 		return hash.(common.Hash)
 	}
-	v := b.header.Hash()
+	v := b.header.NodeHash
+	if v == (common.Hash{}) {
+		v = b.header.Hash()
+	}
 	b.hash.Store(v)
 	return v
 }

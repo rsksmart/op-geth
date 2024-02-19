@@ -191,6 +191,7 @@ func (ec *Client) getBlock(ctx context.Context, method string, args ...interface
 		}
 		txs[i] = tx.tx
 	}
+
 	return types.NewBlockWithHeader(head).WithBody(txs, uncles).WithWithdrawals(body.Withdrawals), nil
 }
 
@@ -563,7 +564,7 @@ func (ec *Client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 // allow a timely execution of a transaction.
 func (ec *Client) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
 	var hex hexutil.Big
-	if err := ec.c.CallContext(ctx, &hex, "eth_maxPriorityFeePerGas"); err != nil {
+	if err := ec.c.CallContext(ctx, &hex, "eth_gasPrice"); err != nil {
 		return nil, err
 	}
 	return (*big.Int)(&hex), nil
@@ -647,7 +648,7 @@ func toCallArg(msg ethereum.CallMsg) interface{} {
 		"to":   msg.To,
 	}
 	if len(msg.Data) > 0 {
-		arg["input"] = hexutil.Bytes(msg.Data)
+		arg["data"] = hexutil.Bytes(msg.Data)
 	}
 	if msg.Value != nil {
 		arg["value"] = (*hexutil.Big)(msg.Value)
