@@ -123,14 +123,19 @@ func (h *Header) isL1Block() bool {
 func (h *Header) BaseFee() *big.Int {
 	if h.isL1Block() {
 		return h.RskMinimumGasPrice
-	} else {
-		return h.EthBaseFee
 	}
+	return h.EthBaseFee
 }
 
 // Hash returns the block hash of the header, which is simply the keccak256 hash of its
 // RLP encoding.
 func (h *Header) Hash() common.Hash {
+	if h.isL1Block() {
+		if (h.NodeHash == common.Hash{}) {
+			fmt.Printf("missing hash for rsk l1 block.")
+		}
+		return h.NodeHash
+	}
 	return rlpHash(h)
 }
 
