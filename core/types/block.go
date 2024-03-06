@@ -83,7 +83,7 @@ type Header struct {
 	EthBaseFee *big.Int `json:"baseFeePerGas" rlp:"optional"`
 
 	// Rootstock specific
-	RskMinimumGasPrice *big.Int `json:"minimumGasPrice,omitempty" rlp:"optional"`
+	RskMinimumGasPrice *big.Int `json:"minimumGasPrice,omitempty" rlp:"-"`
 
 	// WithdrawalsHash was added by EIP-4895 and is ignored in legacy headers.
 	WithdrawalsHash *common.Hash `json:"withdrawalsRoot" rlp:"optional"`
@@ -123,9 +123,8 @@ func (h *Header) isL1Block() bool {
 func (h *Header) BaseFee() *big.Int {
 	if h.isL1Block() {
 		return h.RskMinimumGasPrice
-	} else {
-		return h.EthBaseFee
 	}
+	return h.EthBaseFee
 }
 
 // Hash returns the block hash of the header, which is simply the keccak256 hash of its

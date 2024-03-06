@@ -32,7 +32,7 @@ func (h Header) MarshalJSON() ([]byte, error) {
 		MixDigest          common.Hash     `json:"mixHash"`
 		Nonce              BlockNonce      `json:"nonce"`
 		EthBaseFee         *hexutil.Big    `json:"baseFeePerGas" rlp:"optional"`
-		RskMinimumGasPrice *hexutil.Big    `json:"minimumGasPrice,omitempty" rlp:"optional"`
+		RskMinimumGasPrice *hexutil.Big    `json:"minimumGasPrice,omitempty" rlp:"-"`
 		WithdrawalsHash    *common.Hash    `json:"withdrawalsRoot" rlp:"optional"`
 		BlobGasUsed        *hexutil.Uint64 `json:"blobGasUsed" rlp:"optional"`
 		ExcessBlobGas      *hexutil.Uint64 `json:"excessBlobGas" rlp:"optional"`
@@ -86,7 +86,7 @@ func (h *Header) UnmarshalJSON(input []byte) error {
 		MixDigest          *common.Hash    `json:"mixHash"`
 		Nonce              *BlockNonce     `json:"nonce"`
 		EthBaseFee         *hexutil.Big    `json:"baseFeePerGas" rlp:"optional"`
-		RskMinimumGasPrice *hexutil.Big    `json:"minimumGasPrice,omitempty" rlp:"optional"`
+		RskMinimumGasPrice *hexutil.Big    `json:"minimumGasPrice,omitempty" rlp:"-"`
 		WithdrawalsHash    *common.Hash    `json:"withdrawalsRoot" rlp:"optional"`
 		BlobGasUsed        *hexutil.Uint64 `json:"blobGasUsed" rlp:"optional"`
 		ExcessBlobGas      *hexutil.Uint64 `json:"excessBlobGas" rlp:"optional"`
